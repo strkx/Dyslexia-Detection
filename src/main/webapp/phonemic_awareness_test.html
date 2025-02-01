@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phonemic Awareness Test</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f8ff;
+      background: url('./IMAGES/kids.jpg') no-repeat center center/cover;
+    }
+    .container {
+      max-width: 600px;
+      margin-top: 50px;
+    }
+    .feedback {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+    .options button {
+      margin: 10px;
+    }
+    #nextButton {
+      margin-top: 20px;
+    }
+    #finishTestBtn {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container text-center">
+    <h1 class="mb-4">Phonemic Awareness Test</h1>
+    <p>Listen to the word and select the correct one.</p>
+    <p>Click 'Hear the Word' to listen to the next word.</p>
+
+    <button id="speakButton" class="btn btn-primary">Hear the Word</button>
+    
+    <div class="options">
+      <button id="option1" class="btn btn-secondary" onclick="checkAnswer('dog')">dog</button>
+      <button id="option2" class="btn btn-secondary" onclick="checkAnswer('log')">log</button>
+      <button id="option3" class="btn btn-secondary" onclick="checkAnswer('bog')">bog</button>
+      <button id="option4" class="btn btn-secondary" onclick="checkAnswer('fog')">fog</button>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+    <div id="nextButton" class="text-center mt-4">
+      <button class="btn btn-success btn-lg disabled" onclick="nextSentence()">Next</button>
+    </div>
+    
+    <!-- Finish Test Button -->
+    <button id="finishTestBtn" class="btn btn-info w-100 mt-3" style="display: none;">Finish Test</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    const words = [
+      { word: 'dog', correct: 'dog' },
+      { word: 'log', correct: 'log' },
+      { word: 'bog', correct: 'bog' },
+      { word: 'fog', correct: 'fog' }
+    ];
+
+    let currentWordIndex = 0;
+    let errors = 0;
+
+    // Function to speak the word
+    function speakWord(word) {
+      const utterance = new SpeechSynthesisUtterance(word);
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Function to check the user's answer
+    function checkAnswer(selected) {
+      const feedbackDiv = document.getElementById("feedback");
+      const currentWord = words[currentWordIndex].word;
+
+      if (selected === currentWord) {
+        feedbackDiv.innerHTML = `<span class="correct">✅ Correct!</span>`;
+      } else {
+        feedbackDiv.innerHTML = `<span class="incorrect">❌ Incorrect. The correct answer is '${currentWord}'.</span>`;
+        errors++;
+      }
+
+      // Disable all options after selection
+      const options = document.querySelectorAll(".options button");
+      options.forEach(btn => btn.disabled = true);
+
+      // Enable next button
+      document.getElementById("nextButton").querySelector("button").classList.remove("disabled");
+    }
+
+    // Function to load the next sentence
+    function nextSentence() {
+      currentWordIndex++;
+      
+      // Check if there are more words to display
+      if (currentWordIndex < words.length) {
+        // Enable all buttons
+        const options = document.querySelectorAll(".options button");
+        options.forEach(btn => btn.disabled = false);
+
+        speakWord(words[currentWordIndex].word);
+        document.getElementById("feedback").innerHTML = ""; // Clear feedback
+        document.getElementById("nextButton").querySelector("button").classList.add("disabled"); // Disable next button
+
+      } else {
+        // If no more words, show final feedback
+        const accuracy = ((words.length - errors) / words.length) * 100;
+        document.getElementById("feedback").innerHTML = `
+          <span class="feedback">Test complete!</span><br>
+          <span>Your accuracy: ${accuracy.toFixed(2)}%</span><br>
+          <span>Total errors: ${errors}</span>
+        `;
+
+        // Save the result in sessionStorage
+        sessionStorage.setItem('phonemic_awareness_errors_score', errors);
+
+        // Show Finish Test button
+        document.getElementById('finishTestBtn').style.display = 'block';
+      }
+    }
+
+    // Event listener for the "Hear the Word" button
+    document.getElementById("speakButton").addEventListener("click", () => {
+      if (currentWordIndex < words.length) {
+        nextSentence();
+      }
+      
+    });
+
+    // Redirect to the form page (dyslexia_prediction.html) after finishing the test
+    document.getElementById('finishTestBtn').addEventListener('click', function() {
+      // Ensure phonemic result is stored in sessionStorage
+      sessionStorage.setItem('phonemic_errors_score', errors); // Match form's expected key
+
+      // Redirect to the main form page
+      window.location.href = "dyslexia-prediction.html"; // Redirect to the main form page
+    });
+
+  </script>
+</body>
+</html>

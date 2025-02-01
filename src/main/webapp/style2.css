@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+/* Timeline Styles */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.timeline-step {
+  width: 100%;
+  margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+}
+
+.timeline-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background-color: #007bff;
+  z-index: -1;
+}
+
+.timeline-step:last-child::before {
+  display: none;
+}
+
+.timeline-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.timeline-content h5 {
+  margin-bottom: 10px;
+  color: #007bff;
+}
+
+.timeline-content p {
+  margin-bottom: 0;
+  color: #555;
+}
+
+/* Start Button */
+#startButton {
+  font-size: 1.2rem;
+  padding: 10px 30px;
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwriting Analysis</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        h2 {
+            text-align: center;
+            color: #343a40;
+            font-weight: bold;
+        }
+        .dropbox {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            font-size: 16px;
+            color: #007bff;
+            background-color: #f9f9f9;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .dropbox:hover {
+            background-color: #e3f2fd;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        #preview {
+            margin-top: 20px;
+            width: 100%;
+            max-height: 250px;
+            display: none;
+            border-radius: 10px;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+        }
+        .btn-upload {
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Handwriting Analysis</h2>
+
+        <!-- Drag & Drop Box -->
+        <div class="dropbox" onclick="document.getElementById('fileInput').click()" 
+             ondragover="event.preventDefault()" 
+             ondrop="handleDrop(event)">
+            Drag & Drop Image Here or Click to Upload
+        </div>
+
+        <!-- File Input -->
+        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+
+        <!-- Image Preview -->
+        <img id="preview" alt="Image Preview">
+
+        <!-- Upload Button -->
+        <button class="btn btn-primary btn-upload mt-3" onclick="uploadImage()">Analyze Handwriting</button>
+
+        <!-- Prediction Result -->
+        <div id="result" class="result"></div>
+        
+        <!-- Footer -->
+        <div class="footer"></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function previewImage(event) {
+            let file = event.target.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function() {
+                    document.getElementById('preview').src = reader.result;
+                    document.getElementById('preview').style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            let file = event.dataTransfer.files[0];
+            document.getElementById('fileInput').files = event.dataTransfer.files;
+            previewImage({ target: { files: [file] } });
+        }
+
+        function uploadImage() {
+            let fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert("Please select an image first!");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("image", fileInput.files[0]);
+
+            fetch("http://127.0.0.1:5000/handwriting-analysis", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerText = "Error: " + data.error;
+                    document.getElementById("result").style.color = "red";
+                } else {
+                    document.getElementById("result").innerHTML = 
+                        `<span class="badge bg-success">Prediction: ${data.predicted_class}</span>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("result").innerText = "Failed to connect to the server!";
+                document.getElementById("result").style.color = "red";
+            });
+        }
+    </script>
+
+</body>
+</html>

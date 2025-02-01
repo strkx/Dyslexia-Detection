@@ -1,0 +1,19 @@
+@charset "UTF-8";
+/* Set the background image for the entire page */
+body {
+  background-image: url("IMAGES/kids.jpg"); /* Path to your background image */
+  background-size: cover; /* Cover the entire page */
+  background-position: center; /* Center the background image */
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+  background-attachment: fixed; /* Fix the background while scrolling */
+  min-height: 100vh; /* Ensure the background covers the full viewport height */
+}
+
+
+
+/* Adjust card background for better readability */
+.card {
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly opaque white background for cards */
+  border: none; /* Remove default border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dyslexia Prediction Test</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; background: url('./IMAGES/kids.jpg') no-repeat center center/cover; }
+    .container { max-width: 600px; margin-top: 50px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Dyslexia Prediction Test</h1>
+
+    <!-- Attention Span -->
+    <div class="mb-4">
+      <label for="attention" class="form-label">Attention Span</label>
+      <input type="number" id="attention" class="form-control" placeholder="Enter attention span score" disabled>
+      <button class="btn btn-primary mt-2" id="takeAttentionTest">Take Attention Span Test</button>
+    </div>
+
+    <!-- Cognitive Score -->
+    <div class="mb-4">
+      <label for="cognitive" class="form-label">Cognitive Score</label>
+      <input type="number" id="cognitive" class="form-control" placeholder="Enter cognitive score" disabled>
+      <button class="btn btn-primary mt-2" id="takeCognitiveTest">Take Cognitive Test</button>
+    </div>
+
+    <!-- Reading Speed -->
+    <div class="mb-4">
+      <label for="reading_speed" class="form-label">Reading Speed</label>
+      <input type="number" id="reading_speed" class="form-control" placeholder="Enter reading speed" disabled>
+      <button class="btn btn-primary mt-2" id="takeReadingSpeedTest">Take Reading Speed Test</button>
+    </div>
+
+    <!-- Spelling Accuracy -->
+    <div class="mb-4">
+      <label for="spelling_accuracy" class="form-label">Spelling Accuracy</label>
+      <input type="number" id="spelling_accuracy" class="form-control" placeholder="Enter spelling accuracy" disabled>
+      <button class="btn btn-primary mt-2" id="takeSpellingAccuracyTest">Take Spelling Accuracy Test</button>
+    </div>
+
+    <!-- Writing Errors -->
+    <div class="mb-4">
+      <label for="writing_errors" class="form-label">Writing Errors</label>
+      <input type="number" id="writing_errors" class="form-control" placeholder="Enter writing errors" disabled>
+      <button class="btn btn-primary mt-2" id="takeWritingErrorsTest">Take Writing Errors Test</button>
+    </div>
+
+    <!-- Phonemic Awareness Errors -->
+    <div class="mb-4">
+      <label for="phonemic_errors" class="form-label">Phonemic Awareness Errors</label>
+      <input type="number" id="phonemic_errors" class="form-control" placeholder="Enter phonemic awareness errors" disabled>
+      <button class="btn btn-primary mt-2" id="takePhonemicErrorsTest">Take Phonemic Awareness Test</button>
+    </div>
+
+    <!-- Response Time -->
+    <div class="mb-4">
+      <label for="response_time" class="form-label">Response Time</label>
+      <input type="number" id="response_time" class="form-control" placeholder="Enter response time" disabled>
+      <button class="btn btn-primary mt-2" id="takeResponseTimeTest">Take Response Time Test</button>
+    </div>
+
+    <!-- Submit Button -->
+    <button id="submitBtn" class="btn btn-success w-100">Submit & Predict</button>
+
+    <!-- Result -->
+    <div id="result" class="mt-4 text-center" style="font-size: 1.5em;"></div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    // When the page loads, populate the form with any stored values from sessionStorage
+    window.onload = function() {
+      const tests = ["attention", "cognitive", "reading_speed", "spelling_accuracy", "writing_errors", "phonemic_errors", "response_time"];
+      
+      tests.forEach(test => {
+        const value = sessionStorage.getItem(test + "_score");
+        if (value) {
+          document.getElementById(test).value = value;
+        }
+      });
+    };
+
+    // Event Listeners for "Take Test" buttons
+    document.getElementById('takeAttentionTest').addEventListener('click', function() {
+      window.location.href = "attention_span_calculator.html";
+    });
+
+    document.getElementById('takeCognitiveTest').addEventListener('click', function() {
+      window.location.href = "cognitive_score_test.html";
+    });
+
+    document.getElementById('takeReadingSpeedTest').addEventListener('click', function() {
+      window.location.href = "reading_speed_test.html";
+    });
+
+    document.getElementById('takeSpellingAccuracyTest').addEventListener('click', function() {
+      window.location.href = "spelling_accuracy_test.html";
+    });
+
+    document.getElementById('takeWritingErrorsTest').addEventListener('click', function() {
+      window.location.href = "writing_errors_test.html";
+    });
+
+    document.getElementById('takePhonemicErrorsTest').addEventListener('click', function() {
+      window.location.href = "phonemic_awareness_test.html";
+    });
+
+    document.getElementById('takeResponseTimeTest').addEventListener('click', function() {
+      window.location.href = "response_time_test.html";
+    });
+
+    // Submit Button Logic
+    document.getElementById('submitBtn').addEventListener('click', function() {
+      const attention = document.getElementById('attention').value;
+      const cognitive = document.getElementById('cognitive').value;
+      const reading_speed = document.getElementById('reading_speed').value;
+      const spelling_accuracy = document.getElementById('spelling_accuracy').value;
+      const writing_errors = document.getElementById('writing_errors').value;
+      const phonemic_errors = document.getElementById('phonemic_errors').value;
+      const response_time = document.getElementById('response_time').value;
+      
+      // Collect input data
+      const inputData = {
+        Attention_Span: attention,
+        Cognitive_Score: cognitive,
+        Reading_Speed: reading_speed,
+        Spelling_Accuracy: spelling_accuracy,
+        Writing_Errors: writing_errors,
+        Phonemic_Awareness_Errors: phonemic_errors,
+        Response_Time: response_time
+      };
+
+      fetch('http://127.0.0.1:5000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputData)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        if (data.prediction !== undefined) {
+          // Convert prediction to meaningful text
+          const resultText = data.prediction == 1 
+            ? "High likelihood of dyslexia" 
+            : "Low likelihood of dyslexia";
+          document.getElementById('result').innerText = resultText;
+        } else {
+          document.getElementById('result').innerText = "❌ Error: " + (data.error || "No prediction returned");
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('result').innerText = "❌ Error: " + error.message;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing Errors Test</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("IMAGES/kids.jpg") no-repeat center center/cover;
+      background-color: #f8f9fa;
+      background: url('./IMAGES/kids.jpg') no-repeat center center/cover;
+    }
+    .container {
+      max-width: 600px;
+      margin-top: 50px;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .feedback {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+    .progress {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Writing Errors Test</h1>
+    <div class="card shadow">
+      <div class="card-body">
+        <p class="lead">Listen to the sentence and type it below:</p>
+        <div class="mb-3">
+          <button id="speakButton" class="btn btn-primary">Hear the Sentence</button>
+        </div>
+        <div class="mb-3">
+          <textarea id="userInput" class="form-control" rows="4" placeholder="Type the sentence here"></textarea>
+        </div>
+        <button id="checkButton" class="btn btn-success">Check Writing</button>
+        <div id="feedback" class="feedback mt-3"></div>
+        <div id="progress" class="progress mt-3"></div>
+      </div>
+    </div>
+
+    <!-- Finish Test Button -->
+    <button id="finishTestBtn" class="btn btn-info w-100 mt-3" style="display: none;">Finish Test</button>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  <!-- Custom JS -->
+  <script>
+    const sentences = [
+      "The cat sat on the mat.",
+      "I like to play with my dog.",
+      "The sun is very bright.",
+      "We went to the park.",
+      "She has a red ball.",
+      "He eats an apple.",
+      "The bird can fly.",
+      "My mom is very kind.",
+      "I see a big tree.",
+      "The fish swims in the water."
+    ];
+    let currentSentenceIndex = 0;
+    let correctCount = 0;
+    let totalErrors = 0;
+
+    // Function to speak the sentence
+    function speakSentence(sentence) {
+      const utterance = new SpeechSynthesisUtterance(sentence);
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Function to calculate writing errors
+    function calculateErrors(original, userInput) {
+      const originalWords = original.toLowerCase().split(" ");
+      const userWords = userInput.toLowerCase().split(" ");
+      let errors = 0;
+
+      for (let i = 0; i < Math.max(originalWords.length, userWords.length); i++) {
+        if (originalWords[i] !== userWords[i]) {
+          errors++;
+        }
+      }
+
+      errors += Math.abs(originalWords.length - userWords.length);
+      return errors;
+    }
+
+    // Function to check writing
+    function checkWriting() {
+      const userInput = document.getElementById("userInput").value.trim();
+      const feedbackDiv = document.getElementById("feedback");
+      const progressDiv = document.getElementById("progress");
+
+      const errors = calculateErrors(sentences[currentSentenceIndex], userInput);
+      totalErrors += errors;
+
+      if (errors === 0) {
+        feedbackDiv.innerHTML = `<span class="correct">Perfect! No errors.</span>`;
+        correctCount++;
+      } else {
+        feedbackDiv.innerHTML = `
+          <span class="incorrect">Errors found: ${errors}</span><br>
+          <span>Your input: ${userInput}</span><br>
+          <span>Correct sentence: ${sentences[currentSentenceIndex]}</span>
+        `;
+      }
+
+      currentSentenceIndex++;
+      updateProgress();
+
+      if (currentSentenceIndex < sentences.length) {
+        setTimeout(() => {
+          nextSentence();
+        }, 2000);
+      } else {
+        showFinalResults();
+      }
+    }
+
+    // Function to update progress
+    function updateProgress() {
+      const progressDiv = document.getElementById("progress");
+      progressDiv.innerHTML = `Progress: ${currentSentenceIndex}/${sentences.length} sentences attempted.`;
+    }
+
+    // Function to show final results and store in sessionStorage
+    function showFinalResults() {
+      const accuracy = (correctCount / sentences.length) * 100;
+      const feedbackDiv = document.getElementById("feedback");
+      feedbackDiv.innerHTML = `
+        <span class="feedback">Test complete!</span><br>
+        <span>Your writing accuracy: ${accuracy.toFixed(2)}%</span><br>
+        <span>Total errors: ${totalErrors}</span><br>
+        <span>You wrote ${correctCount} out of ${sentences.length} sentences correctly.</span>
+      `;
+
+      document.getElementById("speakButton").disabled = true;
+      document.getElementById("checkButton").disabled = true;
+
+      // Save writing errors score in sessionStorage
+      sessionStorage.setItem('writing_errors_score', totalErrors);
+
+      // Show Finish Test button
+      document.getElementById('finishTestBtn').style.display = 'block';
+    }
+
+    // Function to load the next sentence
+    function nextSentence() {
+      speakSentence(sentences[currentSentenceIndex]);
+      document.getElementById("userInput").value = "";
+      document.getElementById("feedback").innerHTML = "";
+    }
+
+    // Event listeners
+    document.getElementById("speakButton").addEventListener("click", () => {
+      if (currentSentenceIndex < sentences.length) {
+        nextSentence();
+      }
+    });
+
+    document.getElementById("checkButton").addEventListener("click", checkWriting);
+
+    // Finish Test Button click event
+    document.getElementById('finishTestBtn').addEventListener('click', function () {
+      window.location.href = "/src/main/webapp/dyslexia-prediction.html"; // Redirect to prediction page
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OCR Image Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px auto;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    h2, h3 {
+      margin-top: 30px;
+    }
+
+    input[type="file"] {
+      margin: 20px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #imagePreview {
+      max-width: 100%;
+      height: auto;
+      margin: 20px auto;
+      display: block;
+      border: 2px solid #ccc;
+    }
+
+    textarea {
+      width: 90%;
+      height: 120px;
+      margin: 10px auto;
+      display: block;
+      font-size: 16px;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Upload Image for OCR Processing</h2>
+
+  <!-- Upload Form -->
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="imageInput" accept="image/*" required />
+    <br />
+    <img id="imagePreview" style="display: none;" />
+    <br />
+    <button type="submit">Upload &amp; Process</button>
+  </form>
+
+  <h3>Extracted Text (Original):</h3>
+  <textarea id="originalText" readonly></textarea>
+
+  <h3>Corrected Text:</h3>
+  <textarea id="correctedText" readonly></textarea>
+
+  <h3>Simplified Text:</h3>
+  <textarea id="simplifiedText" readonly></textarea>
+
+  <button onclick="readAloud()">🔊 Read Aloud</button>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const imagePreview = document.getElementById("imagePreview");
+    const uploadForm = document.getElementById("uploadForm");
+
+    const originalTextEl = document.getElementById("originalText");
+    const correctedTextEl = document.getElementById("correctedText");
+    const simplifiedTextEl = document.getElementById("simplifiedText");
+
+    // Show a preview of the selected image
+    imageInput.addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // On form submit, upload the image to the server
+    uploadForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const file = imageInput.files[0];
+      if (!file) {
+        alert("Please select an image first.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Fetch the /upload endpoint in ocr.py
+      fetch("http://127.0.0.1:5000/upload", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // Check for errors
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          // Display the returned text in textareas
+          originalTextEl.value = data.original_text || "";
+          correctedTextEl.value = data.corrected_text || "";
+          simplifiedTextEl.value = data.simplified_text || "";
+        })
+        .catch((err) => {
+          console.error("Error:", err);
+          alert("Something went wrong. Check the console for details.");
+        });
+    });
+
+    // Use the browser’s Speech Synthesis API to read the "corrected" text aloud
+    function readAloud() {
+      const text = correctedTextEl.value.trim();
+      if (!text) {
+        alert("No corrected text to read.");
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>

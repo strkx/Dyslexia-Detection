@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Response Time Test</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; }
+    .container { max-width: 600px; margin-top: 50px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Response Time Test</h1>
+    <button id="startBtn" class="btn btn-primary">Start Test</button>
+    <button id="reactionBtn" class="btn btn-danger" style="display: none;">Click Now!</button>
+
+    <div id="result" class="mt-4 text-center" style="font-size: 1.5em;"></div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+  <!-- JavaScript for handling the test -->
+  <script>
+    let startTime, endTime, timeout;
+
+    // Start the test
+    document.getElementById('startBtn').addEventListener('click', function() {
+      document.getElementById('result').innerText = ""; // Clear previous result
+      document.getElementById('reactionBtn').style.display = "none"; // Hide reaction button
+
+      // Random delay between 2 to 7 seconds
+      let randomTime = Math.random() * 5000 + 2000;
+      timeout = setTimeout(() => {
+        startTime = new Date().getTime(); // Record start time
+        document.getElementById('reactionBtn').style.display = "inline-block"; // Show reaction button
+        document.getElementById('reactionBtn').classList.remove("btn-danger");
+        document.getElementById('reactionBtn').classList.add("btn-success");
+        document.getElementById('reactionBtn').innerText = "Click Now!";
+      }, randomTime);
+    });
+
+    // Handle reaction button click
+    document.getElementById('reactionBtn').addEventListener('click', function() {
+      endTime = new Date().getTime(); // Record end time
+      let reactionTime = (endTime - startTime) / 1000; // Calculate response time in seconds
+      document.getElementById('result').innerText = `Your response time: ${reactionTime.toFixed(3)} seconds`;
+
+      // Save the result in sessionStorage
+      sessionStorage.setItem('response_time_score', reactionTime.toFixed(3)); // 🔑 Key matches form's expected key
+
+      // Redirect back to the main form
+      window.location.href = "dyslexia-prediction.html"; // 🎯 Redirect to the main form
+    });
+  </script>
+</body>
+</html>
